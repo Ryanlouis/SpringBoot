@@ -50,7 +50,3 @@ https://visualvm.github.io/
 
 <img width="569" height="195" alt="{84C4CF4C-EB2A-4EDD-A209-90683D8D7889}" src="https://github.com/user-attachments/assets/2fbd9116-5a93-4be6-b29d-6239e0656373" />
 <img width="1221" height="829" alt="image" src="https://github.com/user-attachments/assets/d5a63cce-8871-4093-ac1d-a9d1c4207a48" />
-
-
-```html
-```
