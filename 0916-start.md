@@ -19,11 +19,13 @@ https://www.jetbrains.com/idea/download/download-thanks.html?platform=windows&co
 
 ### 確認Java安裝完成
 
-<img width="811" height="379" alt="{D9214111-6C3F-4EC3-910B-DB40357C9BD2}" src="https://github.com/user-attachments/assets/3f562553-dd67-496c-bbca-1d83ada418d3" />
 * java --version  
 * javac --version  
 * where java  
 * where javac  
+
+<img width="811" height="379" alt="{D9214111-6C3F-4EC3-910B-DB40357C9BD2}" src="https://github.com/user-attachments/assets/3f562553-dd67-496c-bbca-1d83ada418d3" />
+ 
 
 ### 修改 intelliJ 記憶體
 
