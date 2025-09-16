@@ -37,6 +37,19 @@ https://www.jetbrains.com/idea/download/download-thanks.html?platform=windows&co
 
 重開 intelliJ  
 
+### 打開 jconsole 確認是否修改成功
+
+打開cmd下jconsole  
+
+<img width="490" height="477" alt="2025-09-16 09_43_52-Java Monitoring   Management Console" src="https://github.com/user-attachments/assets/9d239a9b-ea72-4b08-816f-e02dcfb7fa72" />
+<img width="886" height="743" alt="2025-09-16 09_45_20-Java Monitoring   Management Console - pid_ 5668 com intellij idea Main" src="https://github.com/user-attachments/assets/60f4730c-089b-4d14-a400-153246e4ed0a" />
+
+### 安裝 VisualVM
+
+https://visualvm.github.io/  
+
+<img width="569" height="195" alt="{84C4CF4C-EB2A-4EDD-A209-90683D8D7889}" src="https://github.com/user-attachments/assets/2fbd9116-5a93-4be6-b29d-6239e0656373" />
+<img width="1221" height="829" alt="image" src="https://github.com/user-attachments/assets/d5a63cce-8871-4093-ac1d-a9d1c4207a48" />
 
 
 ```html
