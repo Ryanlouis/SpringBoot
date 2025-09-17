@@ -1,4 +1,4 @@
-# 0917 Practice - Demo02
+# 0917 Practice - Demo01
 
 ### 
 
@@ -73,3 +73,122 @@ public class Demo3Test {
                 .andExpect(MockMvcResultMatchers.status().is4xxClientError());
     }
 }
+
+### Demo4Test
+
+```
+Demo4Test
+
+package com.uuu.demo1;
+
+import com.uuu.demo1.controllers.DemoController;
+import com.uuu.demo1.controllers.FakeController;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+//@WebMvcTest(controllers = {DemoController.class})
+@WebMvcTest
+public class Demo4Test {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void checkDemoControllerNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+
+    @Test
+    public void testHomeIsOk() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testHomeIs2XX() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testRootShouldReturnHome() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"));
+    }
+
+    @Test
+    public void testRootShouldReturnHomeContainsThymeleaf() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"))
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("thymeleaf")));
+    }
+
+    @Test
+    public void testInfoShouldReturnCorrectName() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("info/contact"));
+    }
+
+    @Test
+    public void testAdminIsNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void testAdminIs4XXClientSideError() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+}
+```
+
+### @Service
+
+```java
+GreetingService.java
+
+package com.uuu.demo1.services;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class GreetingService {
+    public String greet() {
+        return "Hello, this is my first spring boot service";
+    }
+}
+```
+
+```java
+GreetController.java
+
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.services.GreetingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class GreetController {
+    @Autowired
+    private GreetingService service;
+
+    @RequestMapping("/greeting")
+    public @ResponseBody String greeting() {
+        return service.greet();
+    }
+}
+```
