@@ -1,0 +1,665 @@
+﻿click docker
+gear/Software update/ Download update
+
+
+https://learn.microsoft.com/zh-tw/java/openjdk/download
+https://aka.ms/download-jdk/microsoft-jdk-17.0.16-windows-x64.msi
+
+https://www.jetbrains.com/idea/download/download-thanks.html?platform=windows&code=IIC
+
+install microsoft openjdk to ==> C:\jdk-17.0.16.8\
+
+install intelliJ
+
+open a cmd
+java --version
+where java
+where javac
+
+C:\Users\Admin\AppData\Roaming\JetBrains\IdeaIC2025.2
+
+-Xmx8192m
+-Xms8192m
+
+jconsole
+
+install EN/US keyboard
+
+
+https://visualvm.github.io/
+
+C:\Users\Admin\Downloads\visualvm_22\visualvm_22\bin
+visualvm
+
+
+visualvm\etc
+visualvm.conf
+append this line:
+visualvm_jdkhome="C:\\jdk-17.0.16.8"
+
+https://start.spring.io/
+
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.5&packaging=jar&jvmVersion=17&groupId=com.uuu&artifactId=demo1&name=demo1&description=Demo%20project%20for%20Spring%20Boot&packageName=com.uuu.demo1&dependencies=devtools,lombok,web,thymeleaf,validation,actuator
+
+
+1. Project setting ==> JDK
+2. enable annotation processor
+3. install lombok plugin
+4. close IntelliJ, reopen
+5. start spring boot
+
+http://localhost:8080/actuator
+
+==> 結果是json
+
+open terminal inside intelliJ
+.\mvnw --version
+ .\mvnw dependency:tree
+close intelliJ run process
+.\mvnw spring-boot:run
+ctrl+C
+.\mvnw package
+java -jar .\target\demo1-0.0.1-SNAPSHOT.jar
+
+check docker desktop is running
+docker ps
+.\mvnw spring-boot:build-image
+docker images
+ docker run demo1:0.0.1-SNAPSHOT
+
+ docker run demo1:0.0.1-SNAPSHOT -d
+docker run -d -p 8080:8080 demo1:0.0.1-SNAPSHOT
+docker run -d -p 8888:8080 demo1:0.0.1-SNAPSHOT
+
+.\mvnw clean
+
+DemoController.java
+
+package com.uuu.demo1;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class DemoController {
+    @GetMapping("/")
+    public String index() {
+        return "it works";
+    }
+}
+
+
+templates/home.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>hello thymeleaf</h1>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DemoController.java
+
+package com.uuu.demo1.controllers;
+
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+public class DemoController {
+    @GetMapping("/")
+    public String index() {
+        return "home";
+    }
+}
+
+https://www.thymeleaf.org/
+
+
+1. put images
+
+2. change html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>hello thymeleaf</h1>
+<p>origin</p>
+<img src="/images/thymeleaf.png"/>
+<p>server side rendering</p>
+<img src="/images/thymeleaf.png"/>
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>hello thymeleaf</h1>
+<p>origin</p>
+<img src="/images/thymeleaf.png"/>
+<p>server side rendering</p>
+<img th:src="@{/images/thymeleaf.png}"/>
+</body>
+</html>
+
+
+application.properties
+
+spring.application.name=demo1
+server.servlet.context-path=/ucom
+
+-----------------------------------------
+http://localhost:8080/ucom/
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+template==>
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+info/contact.html
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>如果有問題請聯絡...人</h1>
+</body>
+</html>
+
+--------------------------------------
+http://localhost:8080/ucom/info
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+public class DemoController {
+    private static final String MESSAGE = "message";
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute(MESSAGE,"Hi, 我是Mark Ho");
+        return "home";
+    }
+    @GetMapping("/info")
+    public String info() {
+        return "info/contact";
+    }
+}
+
+back to /
+spring.application.name=demo1
+#server.servlet.context-path=/ucom
+--------------------------------------------
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>hello thymeleaf</h1>
+<h2 style="background-color: red;" th:text="${message}"></h2>
+<h2 style="background-color: blue;">[[${message}]]</h2>
+<hr/>
+<h1>not exist key</h1>
+<h2 style="background-color: red;" th:text="${message123}"></h2>
+<h2 style="background-color: blue;">[[${message123}]]</h2>
+
+<hr/>
+<p>origin</p>
+<img src="/images/thymeleaf.png"/>
+<p>server side rendering</p>
+<img th:src="@{/images/thymeleaf.png}"/>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+public class DemoController {
+    private static final String MESSAGE = "message";
+    private static final String MESSAGE2 = "message2";
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute(MESSAGE,"Hi, 我是Mark Ho");
+        model.addAttribute(MESSAGE2,"learning spring");
+        return "home";
+    }
+    @GetMapping("/info")
+    public String info() {
+        return "info/contact";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>hello thymeleaf</h1>
+<h2 style="background-color: red;" th:text="${message}"></h2>
+<h2 style="background-color: blue;">[[${message}]]</h2>
+<hr/>
+<h1>concat string</h1>
+<h2 style="background-color: red;" th:text="${message2}+' is fun'"></h2>
+<h2 style="background-color: blue;">[[${message2}]] is fun</h2>
+
+<hr/>
+<p>origin</p>
+<img src="/images/thymeleaf.png"/>
+<p>server side rendering</p>
+<img th:src="@{/images/thymeleaf.png}"/>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Course.java
+package com.uuu.demo1.beans;
+
+public class Course {
+    private String id;
+    private String name;
+    private String duration;
+    private String fee;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+
+import com.uuu.demo1.beans.Course;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+public class DemoController {
+    private static final String MESSAGE = "message";
+    private static final String MESSAGE2 = "message2";
+    private static final String INFO_KEY1 = "jcourse";
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute(MESSAGE,"Hi, 我是Mark Ho");
+        model.addAttribute(MESSAGE2,"learning spring");
+        return "home";
+    }
+    @GetMapping("/info")
+    public String info(Model m) {
+        Course course = new Course();
+        m.addAttribute(INFO_KEY1, course);
+        return "info/contact";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h3 th:text="${jcourse}"></h3>
+<h1>如果有問題請聯絡...人</h1>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.beans;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Course {
+    private String id;
+    private String name;
+    private String duration;
+    private String fee;
+
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+https://projectlombok.org/features/Data
+
+package com.uuu.demo1.controllers;
+
+
+import com.uuu.demo1.beans.Course;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+public class DemoController {
+    private static final String MESSAGE = "message";
+    private static final String MESSAGE2 = "message2";
+    private static final String INFO_KEY1 = "jcourse";
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute(MESSAGE,"Hi, 我是Mark Ho");
+        model.addAttribute(MESSAGE2,"learning spring");
+        return "home";
+    }
+    @GetMapping("/info")
+    public String info(Model m) {
+        Course course = new Course();
+        course.setId("SL275");
+        course.setDuration("35hr");
+        course.setFee("24000NTD");
+        course.setName("Java and OOP");
+        m.addAttribute(INFO_KEY1, course);
+        return "info/contact";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h3 th:text="${jcourse}"></h3>
+<ul>
+    <li th:text="${jcourse.id}"></li>
+    <li th:text="${jcourse.name}"></li>
+    <li th:text="${jcourse.duration}"></li>
+    <li th:text="${jcourse.fee}"></li>
+</ul>
+<h1>如果有問題請聯絡...人</h1>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo1
+#server.servlet.context-path=/ucom
+main.course.name=Vue 4 days, Spring Boot 4 days
+---------------------------------
+package com.uuu.demo1.controllers;
+
+
+import com.uuu.demo1.beans.Course;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+@Slf4j
+public class DemoController {
+    private static final String MESSAGE = "message";
+    private static final String MESSAGE2 = "message2";
+    private static final String INFO_KEY1 = "jcourse";
+    @Value("${main.course.name}")
+    private String courseName;
+    private static final Logger LOG = LoggerFactory.getLogger(DemoController.class);
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute(MESSAGE,"Hi, 我是Mark Ho");
+        model.addAttribute(MESSAGE2,"learning spring");
+        return "home";
+    }
+    @GetMapping("/info")
+    public String info(Model m) {
+        System.out.printf("course name=%s\n",courseName);
+        log.info("course name={}",courseName);
+        LOG.info("COURSE NAME={}",courseName);
+        Course course = new Course();
+        course.setId("SL275");
+        course.setDuration("35hr");
+        course.setFee("24000NTD");
+        course.setName("Java and OOP");
+        m.addAttribute(INFO_KEY1, course);
+        return "info/contact";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo1
+#server.servlet.context-path=/ucom
+main.course.name=Vue 4 days, Spring Boot 4 days
+main.course.limit=60
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+
+import com.uuu.demo1.beans.Course;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@Controller
+@Slf4j
+public class DemoController {
+    private static final String MESSAGE = "message";
+    private static final String MESSAGE2 = "message2";
+    private static final String INFO_KEY1 = "jcourse";
+    @Value("${main.course.name}")
+    private String courseName;
+    @Value("${main.course.limit}")
+    private Integer courseLimit;
+    private static final Logger LOG = LoggerFactory.getLogger(DemoController.class);
+
+    @GetMapping("/")
+    public String index(Model model) {
+        model.addAttribute(MESSAGE, "Hi, 我是Mark Ho");
+        model.addAttribute(MESSAGE2, "learning spring");
+        return "home";
+    }
+
+    @GetMapping("/info")
+    public String info(Model m) {
+        System.out.printf("course name=%s\n", courseName);
+        log.info("course name={}, double course limit={}", courseName, courseLimit * 2);
+        LOG.info("COURSE NAME={}, triple course limit={}", courseName, courseLimit * 3);
+        Course course = new Course();
+        course.setId("SL275");
+        course.setDuration("35hr");
+        course.setFee("24000NTD");
+        course.setName("Java and OOP");
+        m.addAttribute(INFO_KEY1, course);
+        return "info/contact";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import org.junit.jupiter.api.*;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+public class DemoTests {
+    @BeforeAll
+    public static void prepareOnce() {
+        System.out.println("一次性的啟動");
+    }
+
+    @AfterAll
+    public static void finalCleanUp() {
+        System.out.println("最後的最後收尾");
+    }
+
+    @BeforeEach
+    public void prepare() {
+        System.out.println("一些準備工作");
+    }
+
+    @AfterEach
+    public void cleanup() {
+        System.out.println("收尾");
+    }
+
+    @Test
+    public void doATest() {
+        System.out.println("test something first");
+    }
+
+    @Test
+    public void doAnotherTest() {
+        System.out.println("test something later");
+    }
+    @Disabled("skip1")
+    @Test
+    public void doATestThatNotYetImplement() {
+        Assertions.fail();
+    }
+    @Disabled("skip2")
+    @Test
+    public void doATestThatNotYetImplementWithReason() {
+        Assertions.fail("下一Q會實作");
+    }
+    @Disabled("skip3")
+    @Test
+    public void doATestThatHasException() {
+        throw new RuntimeException();
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import com.uuu.demo1.controllers.DemoController;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+public class Demo2Test {
+    @Autowired
+    private DemoController controller;
+
+    @Test
+    public void checkDemoControllerNotNull() {
+        Assertions.assertNotNull(controller);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+public class Demo3Test {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void checkDemoControllerNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+public class Demo3Test {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void checkDemoControllerNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+
+    @Test
+    public void testHomeIsOk() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testHomeIs2XX() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testAdminIsNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+    @Test
+    public void testAdminIs4XXClientSideError() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+}
+

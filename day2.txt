@@ -1,0 +1,1420 @@
+﻿package com.uuu.demo1;
+
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+public class Demo3Test {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void checkDemoControllerNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+
+    @Test
+    public void testHomeIsOk() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testHomeIs2XX() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testRootShouldReturnHome() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"));
+    }
+    @Test
+    public void testRootShouldReturnHomeContainsThymeleaf() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"))
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("thymeleaf")));
+    }
+    @Test
+    public void testInfoShouldReturnCorrectName() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("info/contact"));
+    }
+
+    @Test
+    public void testAdminIsNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void testAdminIs4XXClientSideError() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+}
+
+
+ctrl+c ctrl+v 
+Demo3Test==>Demo4Test
+
+package com.uuu.demo1;
+
+import com.uuu.demo1.controllers.DemoController;
+import com.uuu.demo1.controllers.FakeController;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+//@WebMvcTest(controllers = {DemoController.class})
+@WebMvcTest
+public class Demo4Test {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void checkDemoControllerNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+
+    @Test
+    public void testHomeIsOk() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testHomeIs2XX() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testRootShouldReturnHome() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"));
+    }
+
+    @Test
+    public void testRootShouldReturnHomeContainsThymeleaf() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"))
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("thymeleaf")));
+    }
+
+    @Test
+    public void testInfoShouldReturnCorrectName() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("info/contact"));
+    }
+
+    @Test
+    public void testAdminIsNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void testAdminIs4XXClientSideError() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+GreetingService.java
+
+package com.uuu.demo1.services;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class GreetingService {
+    public String greet() {
+        return "Hello, this is my first spring boot service";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+GreetController.java
+
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.services.GreetingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+@Controller
+public class GreetController {
+    @Autowired
+    private GreetingService service;
+
+    @RequestMapping("/greeting")
+    public @ResponseBody String greeting() {
+        return service.greet();
+    }
+}
+
+
+.\mvnw test
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import com.uuu.demo1.controllers.DemoController;
+import com.uuu.demo1.controllers.FakeController;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+//@WebMvcTest(controllers = {DemoController.class})
+@WebMvcTest(controllers = {DemoController.class})
+public class Demo4Test {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    public void checkDemoControllerNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+
+    @Test
+    public void testHomeIsOk() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    public void testHomeIs2XX() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful());
+    }
+
+    @Test
+    public void testRootShouldReturnHome() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"));
+    }
+
+    @Test
+    public void testRootShouldReturnHomeContainsThymeleaf() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("home"))
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("thymeleaf")));
+    }
+
+    @Test
+    public void testInfoShouldReturnCorrectName() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/info"))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andExpect(MockMvcResultMatchers.view().name("info/contact"));
+    }
+
+    @Test
+    public void testAdminIsNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void testAdminIs4XXClientSideError() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/admin"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import com.uuu.demo1.controllers.GreetController;
+import com.uuu.demo1.services.GreetingService;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+//@SpringBootTest
+//@AutoConfigureMockMvc
+@WebMvcTest(controllers = GreetController.class)
+public class Demo5Test {
+    @Autowired
+    private MockMvc mockMvc;
+    @MockitoBean
+    private GreetingService service;
+
+    @Test
+    public void mockMvcShouldNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import com.uuu.demo1.controllers.GreetController;
+import com.uuu.demo1.services.GreetingService;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+//@SpringBootTest
+//@AutoConfigureMockMvc
+@WebMvcTest(controllers = GreetController.class)
+public class Demo5Test {
+    @Autowired
+    private MockMvc mockMvc;
+    @MockitoBean
+    private GreetingService service;
+
+    @Test
+    public void mockMvcShouldNotNull() {
+        Assertions.assertNotNull(mockMvc);
+    }
+
+    @Test
+    public void performGreet() throws Exception {
+        String testString = "hello world";
+        Mockito.when(service.greet()).thenReturn(testString);
+        mockMvc.perform(MockMvcRequestBuilders.get("/greeting"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(MockMvcResultMatchers.content().string(
+                        Matchers.containsString(testString)
+                ))
+        ;
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.beans;
+
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class NormalUser1 {
+    @NotNull(message = "name may not be null")
+    private String name;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import com.uuu.demo1.beans.NormalUser1;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
+//import javax.xml.validation.Validator;
+
+public class Demo6Test {
+    private static Validator validator;
+
+    @BeforeAll
+    public static void prepareValidator() {
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
+    }
+
+    @Test
+    public void createNormalUser1() {
+        NormalUser1 user = new NormalUser1();
+        Assertions.assertNull(user.getName());
+    }
+
+    @Test
+    public void checkNullAssertionShouldTrigger() {
+        NormalUser1 user = new NormalUser1();
+        Set<ConstraintViolation<NormalUser1>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(1, violations.size());
+    }
+    @Test
+    public void checkEmptyIsNull() {
+        NormalUser1 user = new NormalUser1();
+        user.setName("");
+        Set<ConstraintViolation<NormalUser1>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(0, violations.size());
+    }
+    @Test
+    public void checkSpaceIsNull() {
+        NormalUser1 user = new NormalUser1();
+        user.setName("     \t");
+        Set<ConstraintViolation<NormalUser1>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(0, violations.size());
+    }
+    @Test
+    public void checkStuffIsNull() {
+        NormalUser1 user = new NormalUser1();
+        user.setName("www.uuu.com.tw");
+        Set<ConstraintViolation<NormalUser1>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(0, violations.size());
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.beans;
+
+import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class NormalUser2 {
+    @NotEmpty(message = "name may not be empty")
+    private String name;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+package com.uuu.demo1;
+
+import com.uuu.demo1.beans.NormalUser2;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
+//import javax.xml.validation.Validator;
+
+public class Demo7Test {
+    private static Validator validator;
+
+    @BeforeAll
+    public static void prepareValidator() {
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
+    }
+
+    @Test
+    public void createNormalUser2() {
+        NormalUser2 user = new NormalUser2();
+        Assertions.assertNull(user.getName());
+    }
+
+    @Test
+    public void checkNullAssertionShouldTrigger() {
+        NormalUser2 user = new NormalUser2();
+        Set<ConstraintViolation<NormalUser2>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(1, violations.size());
+    }
+    @Test
+    public void checkEmptyIsNull() {
+        NormalUser2 user = new NormalUser2();
+        user.setName("");
+        Set<ConstraintViolation<NormalUser2>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(1, violations.size());
+    }
+    @Test
+    public void checkSpaceIsNull() {
+        NormalUser2 user = new NormalUser2();
+        user.setName("     \t");
+        Set<ConstraintViolation<NormalUser2>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(0, violations.size());
+    }
+    @Test
+    public void checkStuffIsNull() {
+        NormalUser2 user = new NormalUser2();
+        user.setName("www.uuu.com.tw");
+        Set<ConstraintViolation<NormalUser2>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(0, violations.size());
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.beans;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class NormalUser3 {
+    @NotBlank(message = "name may not be blank")
+    private String name;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1;
+
+import com.uuu.demo1.beans.NormalUser3;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
+//import javax.xml.validation.Validator;
+
+public class Demo8Test {
+    private static Validator validator;
+
+    @BeforeAll
+    public static void prepareValidator() {
+        validator = Validation.buildDefaultValidatorFactory().getValidator();
+    }
+
+    @Test
+    public void createNormalUser3() {
+        NormalUser3 user = new NormalUser3();
+        Assertions.assertNull(user.getName());
+    }
+
+    @Test
+    public void checkNullAssertionShouldTrigger() {
+        NormalUser3 user = new NormalUser3();
+        Set<ConstraintViolation<NormalUser3>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(1, violations.size());
+    }
+    @Test
+    public void checkEmptyIsNull() {
+        NormalUser3 user = new NormalUser3();
+        user.setName("");
+        Set<ConstraintViolation<NormalUser3>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(1, violations.size());
+    }
+    @Test
+    public void checkSpaceIsNull() {
+        NormalUser3 user = new NormalUser3();
+        user.setName("     \t");
+        Set<ConstraintViolation<NormalUser3>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(1, violations.size());
+    }
+    @Test
+    public void checkStuffIsNull() {
+        NormalUser3 user = new NormalUser3();
+        user.setName("www.uuu.com.tw");
+        Set<ConstraintViolation<NormalUser3>> violations = validator.validate(user);
+        for (var v : violations) {
+            System.out.printf("find a violation:%s\n", v.getMessage());
+        }
+        Assertions.assertEquals(0, violations.size());
+    }
+}
+
+
+
+CourseForm
+package com.uuu.demo1.forms;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CourseForm {
+    @NotEmpty
+    @Size(min = 5, max = 30)
+    private String courseId;
+    @NotEmpty
+    private String courseName;
+    @NotNull
+    @Min(7)
+    private Integer duration;
+}
+
+courseForm.html
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Course Form</title>
+</head>
+<body>
+<h1>課程表單</h1>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.forms.CourseForm;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class CourseController {
+    @GetMapping("/course")
+    public String showCourseForm(CourseForm f) {
+        return "courseForm";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Course Form</title>
+</head>
+<body>
+<h1>課程表單</h1>
+<p>debug info:[[${courseForm}]]</p>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.forms.CourseForm;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class CourseController {
+    @GetMapping("/course")
+    public String showCourseForm(CourseForm f) {
+        f.setCourseId("OO226");
+        f.setCourseName("Java and OOP");
+        f.setDuration(35);
+        return "courseForm";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Course Form</title>
+</head>
+<body>
+<h1>課程表單</h1>
+
+<form th:action="@{/course}" method="post" th:object="${courseForm}">
+    <input type="text" th:field="*{courseId}"/>
+    <input type="text" th:field="*{courseName}"/>
+    <input type="number" th:field="*{duration}"/>
+    <button type="submit">Submit</button>
+</form>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.forms.CourseForm;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+public class CourseController {
+    @GetMapping("/course")
+    public String showCourseForm(CourseForm f) {
+        f.setCourseId("OO226");
+        f.setCourseName("Java and OOP");
+        f.setDuration(35);
+        return "courseForm";
+    }
+    @PostMapping("/course")
+    public String handleCourseFormSubmit() {
+        return "home"; // this is bad, need to fix later
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.forms.CourseForm;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+@Slf4j
+public class CourseController {
+    @GetMapping("/course")
+    public String showCourseForm(CourseForm f) {
+//        f.setCourseId("OO226");
+//        f.setCourseName("Java and OOP");
+//        f.setDuration(35);
+        return "courseForm";
+    }
+
+    @PostMapping("/course")
+    public String handleCourseFormSubmit(CourseForm f) {
+        log.info("傳送過來的Course是:{}", f);
+        return "courseForm"; // this is bad, need to fix later
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.forms.CourseForm;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+
+@Controller
+@Slf4j
+public class CourseController {
+    @GetMapping("/course")
+    public String showCourseForm(CourseForm f) {
+//        f.setCourseId("OO226");
+//        f.setCourseName("Java and OOP");
+//        f.setDuration(35);
+        return "courseForm";
+    }
+
+    @PostMapping("/course")
+    public String handleCourseFormSubmit(@Valid CourseForm f) {
+        log.info("傳送過來的Course是:{}", f);
+        return "courseForm"; // this is bad, need to fix later
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Course Form</title>
+</head>
+<body>
+<h1>課程表單</h1>
+
+<form th:action="@{/course}" method="post" th:object="${courseForm}">
+    <table>
+        <tr><td><p>course id</p></td><td><input type="text" th:field="*{courseId}"/></td></tr>
+        <tr><td><p>course name</p></td><td><input type="text" th:field="*{courseName}"/></td></tr>
+        <tr><td><p>duration</p></td><td><input type="number" th:field="*{duration}"/></td></tr>
+        <tr><td><button type="submit">Submit</button></td></tr>
+    </table>
+
+
+
+
+</form>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Course Form</title>
+</head>
+<body>
+<h1>課程表單</h1>
+
+<form th:action="@{/course}" method="post" th:object="${courseForm}">
+    <table>
+        <tr>
+            <td><p>course id</p></td>
+            <td><input type="text" th:field="*{courseId}"/></td>
+            <td><p th:errors="*{courseId}"></p></td>
+        </tr>
+        <tr>
+            <td><p>course name</p></td>
+            <td><input type="text" th:field="*{courseName}"/></td>
+            <td><p th:errors="*{courseName}"></p></td>
+        </tr>
+        <tr>
+            <td><p>duration</p></td>
+            <td><input type="number" th:field="*{duration}"/></td>
+            <td><p th:errors="*{duration}"></p></td>
+        </tr>
+        <tr>
+            <td>
+                <button type="submit">Submit</button>
+            </td>
+        </tr>
+    </table>
+
+
+</form>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>success</title>
+</head>
+<body>
+<h1>表單新增成功</h1>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.uuu.demo1.controllers;
+
+import com.uuu.demo1.forms.CourseForm;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Controller
+@Slf4j
+public class CourseController implements WebMvcConfigurer {
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        WebMvcConfigurer.super.addViewControllers(registry);
+        registry.addViewController("/results").setViewName("success");
+    }
+
+    @GetMapping("/course")
+    public String showCourseForm(CourseForm f) {
+//        f.setCourseId("OO226");
+//        f.setCourseName("Java and OOP");
+//        f.setDuration(35);
+        return "courseForm";
+    }
+
+    @PostMapping("/course")
+    public String handleCourseFormSubmit(@Valid CourseForm f, BindingResult result) {
+        if (result.hasErrors()) {
+            log.info("oops, error happened, count={}, proceed", result.getErrorCount());
+            for (var error : result.getAllErrors()) {
+                log.info("error object={}, field={}", error.getObjectName(),error.getArguments());
+            }
+            return "courseForm";
+
+        }
+        log.info("傳送過來的Course是:{}", f);
+        return "redirect:/results"; // this is bad, need to fix later
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo1
+#server.servlet.context-path=/ucom
+main.course.name=Vue 4 days, Spring Boot 4 days
+main.course.limit=60
+management.endpoints.web.exposure.include=*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.5&packaging=jar&jvmVersion=17&groupId=com.example&artifactId=demo2&name=demo2&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo2&dependencies=devtools,lombok,web
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.5</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>demo2</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>demo2</name>
+	<description>Demo project for Spring Boot</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+	</build>
+    <profiles>
+        <profile>
+            <id>dev</id>
+        </profile>
+        <profile>
+            <id>prod</id>
+        </profile>
+        <profile>
+            <id>inner</id>
+        </profile>
+    </profiles>
+
+</project>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.5</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>demo2</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>demo2</name>
+	<description>Demo project for Spring Boot</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+	</build>
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <activatedProperties>dev</activatedProperties>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <activatedProperties>prod</activatedProperties>
+            </properties>
+        </profile>
+        <profile>
+            <id>inner</id>
+            <properties>
+                <activatedProperties>inner</activatedProperties>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+PropertyCheckRunner.java
+package com.example.demo2.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+public class PropertyCheckRunner implements CommandLineRunner {
+    @Value("${spring.profiles.active}")
+    private String profile;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("spring的profile是:{}", profile);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+application.properties
+spring.application.name=demo2
+spring.profiles.active=@activatedProperties@
+greeting=default
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo2.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+public class PropertyCheckRunner implements CommandLineRunner {
+    @Value("${spring.profiles.active}")
+    private String profile;
+    @Value("${greeting}")
+    private String greeting;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("spring的profile是:{}", profile);
+        log.info("greeting的值是:{}", greeting);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+application-dev.properties
+
+greeting=something like internal dev
+
+
+application-inner.properties
+greeting=for inner testing purpose
+
+
+application-prod.properties
+greeting=use with production, caution!
+
+ .\mvnw spring-boot:run
+ .\mvnw -Pinner package
+ java -jar .\target\demo2-0.0.1-SNAPSHOT.jar
+
+open docker
+ .\mvnw -Pprod spring-boot:build-image
+
+docker run demo2:0.0.1-SNAPSHOT
+
+terminal
+chcp
+chcp 65001
+docker run demo2:0.0.1-SNAPSHOT
+docker run  -e JAVA_OPTS="-Dfile.encoding=UTF-8" demo2:0.0.1-SNAPSHOT
+
+
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.5&packaging=jar&jvmVersion=17&groupId=com.example&artifactId=demo3&name=demo3&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo3&dependencies=devtools,lombok,web,thymeleaf,actuator
+
+https://www.postman.com/
+https://www.postman.com/downloads/
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class RestController1 {
+    @RequestMapping(path = "/", method = RequestMethod.GET)
+    String getHome() {
+        return "[GET]Hello World";
+    }
+
+    @RequestMapping(path = "/", method = RequestMethod.POST)
+    String postHome() {
+        return "[POST]Hello World";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class GreetingController {
+    @RequestMapping("/greeting")
+    public String greeting() {
+        return "greeting";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+greeting.html
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Greeting Page</h1>
+</body>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class GreetingController {
+    @RequestMapping("/greeting")
+    public String greeting(Model model, String n) {
+        n = "ucom";
+        model.addAttribute("name", n);
+        return "greeting";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Greeting Page</h1>
+<h2>Hi, [[${name}]]</h2>
+</body>
+</html>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+@Controller
+public class GreetingController {
+    @RequestMapping("/greeting")
+    public String greeting(Model model,
+                           @RequestParam(value = "name", required = false, defaultValue = "ucom 14f") String n) {
+        //n = "ucom";
+        model.addAttribute("name", n);
+        return "greeting";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.calculator;
+
+public interface Calculator {
+    public int calc(int a, int b);
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.calculator;
+
+public class AddCalculator implements Calculator {
+    @Override
+    public int calc(int a, int b) {
+        return a + b;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.config;
+
+import com.example.demo3.calculator.AddCalculator;
+import com.example.demo3.calculator.Calculator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+    @Bean
+    public Calculator cal1() {
+        return new AddCalculator();
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo3
+management.endpoints.web.exposure.include=*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+http://localhost:8080/actuator/beans
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.calculator.Calculator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(1)
+public class ExplainDIRunner1 implements CommandLineRunner {
+    @Autowired
+    private ApplicationContext context;
+
+    @Override
+    public void run(String... args) throws Exception {
+        Calculator c1 = context.getBean(Calculator.class);
+        log.info("c1 with 1,2={}", c1.calc(1, 2));
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+package com.example.demo3.calculator;
+
+public class SubCalculator implements Calculator {
+    @Override
+    public int calc(int a, int b) {
+        return a - b;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.config;
+
+import com.example.demo3.calculator.AddCalculator;
+import com.example.demo3.calculator.Calculator;
+import com.example.demo3.calculator.SubCalculator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+//    @Bean
+//    public Calculator cal1() {
+//        return new AddCalculator();
+//    }
+
+    @Bean
+    public Calculator cal2() {
+        return new SubCalculator();
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.calculator.Calculator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(2)
+public class ExplainDIRunner2 implements CommandLineRunner {
+//    public ExplainDIRunner2(Calculator cal1) {
+//        this.cal1 = cal1;
+//    }
+
+    private final Calculator cal1;
+
+    public ExplainDIRunner2(Calculator cal1) {
+        this.cal1 = cal1;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("calculate 3,4 with cal1={}", cal1.calc(3, 4));
+    }
+}

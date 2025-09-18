@@ -1,0 +1,1578 @@
+﻿package com.example.demo3.runner;
+
+import com.example.demo3.calculator.AddCalculator;
+import com.example.demo3.calculator.Calculator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(3)
+public class ExplainDIRunner3 implements CommandLineRunner {
+    @Autowired
+    private Calculator cal1;
+
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("will append at last");
+        log.info("calculate 5,6 with cal1={}", cal1.calc(5, 6));
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.explain;
+
+import com.example.demo3.calculator.Calculator;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Foo1 {
+    private int x;
+    private Calculator c; // y is important, maybe can be initialized from foo1 constructor
+    private int z;
+
+    public Foo1(Calculator c) {
+        this.c = c;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.explain;
+
+import com.example.demo3.calculator.Calculator;
+import lombok.Getter;
+@Getter
+public class Foo2 {
+    private int x;
+    private final Calculator c; // y is important, maybe can be initialized from foo1 constructor
+    private int z;
+
+
+    public Foo2(Calculator c) {
+        this.c = c;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.explain;
+
+import com.example.demo3.calculator.Calculator;
+import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+@RequiredArgsConstructor
+@Getter
+public class Foo3 {
+    private int x;
+    private final Calculator c; // y is important, maybe can be initialized from foo1 constructor
+    private int z;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+new  ArgumentsTest under src/test/java
+
+package com.example.demo3;
+
+import com.example.demo3.calculator.AddCalculator;
+import com.example.demo3.calculator.SubCalculator;
+import com.example.demo3.explain.Foo1;
+import com.example.demo3.explain.Foo2;
+import com.example.demo3.explain.Foo3;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+public class ArgumentsTest {
+    @Test
+    public void initializeFoo1() {
+        Foo1 foo1 = new Foo1();
+        Assertions.assertNull(foo1.getC());
+
+    }
+
+    @Test
+    public void initializeFoo2() {
+        Foo2 foo2 = new Foo2(new SubCalculator());
+        Assertions.assertEquals(2, foo2.getC().calc(4, 2));
+    }
+
+    @Test
+    public void initializeFoo3() {
+        Foo3 foo3 = new Foo3(new AddCalculator());
+        Assertions.assertEquals(6, foo3.getC().calc(4, 2));
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.race;
+
+public interface Racing {
+    public String status();
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.race;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Bicycle implements Racing {
+    @Override
+    public String status() {
+        return "2km/min";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.race.Bicycle;
+import com.example.demo3.race.Racing;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(4)
+public class ExplainDIRunner4 implements CommandLineRunner {
+    public ExplainDIRunner4(ApplicationContext context) {
+        this.context = context;
+    }
+
+    private ApplicationContext context;
+
+    @Override
+    public void run(String... args) throws Exception {
+        Racing r1 = context.getBean(Racing.class);
+        log.info("r1={}", r1.status());
+        Bicycle b1 = context.getBean(Bicycle.class);
+        log.info("b1={}", b1.status());
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.race.Bicycle;
+import com.example.demo3.race.Racing;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(5)
+public class ExplainDIRunner5 implements CommandLineRunner {
+    @Autowired
+    private Racing r1;
+    @Autowired
+    private Bicycle b1;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("r1={}", r1.status());
+        log.info("b1={}", b1.status());
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(6)
+public class ExplainLog implements CommandLineRunner {
+    @Override
+    public void run(String... args) throws Exception {
+        log.trace("this is a log");
+        log.debug("this is a log");
+        log.info("this is a log");
+        log.warn("this is a log");
+        log.error("this is a log");
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo3
+management.endpoints.web.exposure.include=*
+#logging.level.root=trace
+logging.level.root=info
+logging.level.com.example.demo3.runner.ExplainLog=trace
+
+
+https://docs.spring.io/spring-boot/docs/3.2.2/reference/htmlsingle/
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.config;
+
+import com.example.demo3.calculator.AddCalculator;
+import com.example.demo3.calculator.Calculator;
+import com.example.demo3.calculator.SubCalculator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class AppConfig {
+    @Bean(name = "add")
+    public Calculator cal1() {
+        return new AddCalculator();
+    }
+
+    @Bean(name = "sub")
+    public Calculator cal2() {
+        return new SubCalculator();
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.calculator.Calculator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(1)
+public class ExplainDIRunner1 implements CommandLineRunner {
+    @Autowired
+    private ApplicationContext context;
+
+    @Override
+    public void run(String... args) throws Exception {
+        Calculator c1 = context.getBean("add", Calculator.class);
+        log.info("c1 with 1,2={}", c1.calc(1, 2));
+        Calculator c2 = context.getBean("sub", Calculator.class);
+        log.info("c2 with 1,2={}", c2.calc(1, 2));
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.calculator.Calculator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(2)
+public class ExplainDIRunner2 implements CommandLineRunner {
+
+    private final Calculator cal1;
+    private final Calculator cal2;
+
+    public ExplainDIRunner2(@Qualifier("add") Calculator cal1,
+                            @Qualifier("sub") Calculator cal2) {
+        this.cal1 = cal1;
+        this.cal2 = cal2;
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("calculate 3,4 with cal1={}", cal1.calc(3, 4));
+        log.info("calculate 3,4 with cal2={}", cal2.calc(3, 4));
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.calculator.AddCalculator;
+import com.example.demo3.calculator.Calculator;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(3)
+public class ExplainDIRunner3 implements CommandLineRunner {
+    @Autowired
+    @Qualifier("add")
+    private Calculator cal1;
+    @Autowired
+    @Qualifier("sub")
+    private Calculator cal2;
+
+
+    @Override
+    public void run(String... args) throws Exception {
+
+        log.info("calculate 5,6 with cal1={}", cal1.calc(5, 6));
+        log.info("calculate 5,6 with cal2={}", cal2.calc(5, 6));
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.race;
+
+import org.springframework.stereotype.Component;
+
+@Component("bike")
+public class Bike implements Racing{
+    @Override
+    public String status() {
+        return "80km/hr";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.race;
+
+import org.springframework.stereotype.Component;
+
+@Component("bicycle")
+public class Bicycle implements Racing {
+    @Override
+    public String status() {
+        return "2km/min";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.race.Bicycle;
+import com.example.demo3.race.Bike;
+import com.example.demo3.race.Racing;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(4)
+public class ExplainDIRunner4 implements CommandLineRunner {
+    public ExplainDIRunner4(ApplicationContext context) {
+        this.context = context;
+    }
+
+    private ApplicationContext context;
+
+    @Override
+    public void run(String... args) throws Exception {
+        Racing r1 = context.getBean("bicycle", Racing.class);
+        log.info("r1={}", r1.status());
+        Bicycle b1 = context.getBean(Bicycle.class);
+        log.info("b1={}", b1.status());
+        Racing r2 = context.getBean("bike", Racing.class);
+        log.info("r2={}", r2.status());
+        Bike b2 = context.getBean(Bike.class);
+        log.info("b2={}", b2.status());
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.race.Bicycle;
+import com.example.demo3.race.Bike;
+import com.example.demo3.race.Racing;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(5)
+public class ExplainDIRunner5 implements CommandLineRunner {
+    @Autowired
+    @Qualifier("bicycle")
+    private Racing r1;
+    @Autowired
+    @Qualifier("bike")
+    private Racing r2;
+    @Autowired
+    private Bicycle b1;
+    @Autowired
+    private Bike b2;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("r1={}", r1.status());
+        log.info("b1={}", b1.status());
+        log.info("r2={}", r2.status());
+        log.info("b2={}", b2.status());
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.race.Bicycle;
+import com.example.demo3.race.Bike;
+import com.example.demo3.race.Racing;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(6)
+public class ExplainDIRunner6 implements CommandLineRunner {
+    public ExplainDIRunner6(@Qualifier("bicycle") Racing r1, @Qualifier("bike") Racing r2) {
+        this.r1 = r1;
+        this.r2 = r2;
+        this.b1 = (Bicycle) r1;
+        this.b2 = (Bike) r2;
+    }
+
+    private final Racing r1;
+    private final Racing r2;
+    private final Bicycle b1;
+    private final Bike b2;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("r1={}", r1.status());
+        log.info("b1={}", b1.status());
+        log.info("r2={}", r2.status());
+        log.info("b2={}", b2.status());
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.runner;
+
+import com.example.demo3.race.Bicycle;
+import com.example.demo3.race.Bike;
+import com.example.demo3.race.Racing;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(7)
+public class ExplainDIRunner7 implements CommandLineRunner {
+    public ExplainDIRunner7(Bicycle b1, Bike b2) {
+        this.r1 = b1;
+        this.r2 = b2;
+        this.b1 = b1;
+        this.b2 = b2;
+    }
+
+    private final Racing r1;//bicycle
+    private final Racing r2;//bike
+    private final Bicycle b1;
+    private final Bike b2;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("r1={}", r1.status());
+        log.info("b1={}", b1.status());
+        log.info("r2={}", r2.status());
+        log.info("b2={}", b2.status());
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.beans;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Message {
+    private int id;
+    private String name;
+
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+    @Autowired
+    private Message message;
+
+    @GetMapping("/hello")
+    Message home() {
+        return message;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class WelcomeController {
+    @Autowired
+    private Message message;
+    @GetMapping("/welcome")
+    Message home() {
+        return message;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+    @Autowired
+    private Message message;
+
+    @GetMapping("/hello")
+    Message home() {
+        message.setId(888);
+        message.setName("ucom");
+        return message;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.beans;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Appendix {
+    private String chapter = "default chapter";
+    private String detail = "default detail";
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.beans;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Message {
+    private int id;
+    private String name;
+    private float cost;
+    private boolean isValid;
+    private Date date;
+    private String detail;// test unicode
+    private String[] referral = {"Mark", "John", "Ken"};
+    private Appendix appendix = new Appendix();
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
+
+@RestController
+public class WelcomeController {
+    @Autowired
+    private Message message;
+
+    @GetMapping("/welcome")
+    Message home() {
+        message.setCost(4.5f);
+        message.setValid(true);
+        message.setDate(new Date());
+        message.setDetail("試試萬國碼");
+        return message;
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class HelloController {
+    @Autowired
+    private Message message;
+
+    @GetMapping("/hello")
+    ResponseEntity<?> home() {
+
+        message.setId(888);
+        message.setName("ucom");
+        return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
+
+@RestController
+public class WelcomeController {
+    @Autowired
+    private Message message;
+
+    @GetMapping("/welcome")
+    ResponseEntity<?> home() {
+        message.setCost(4.5f);
+        message.setValid(true);
+        message.setDate(new Date());
+        message.setDetail("試試萬國碼");
+        return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+http://localhost:8080/actuator/beans
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.beans;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Message {
+    @Value("-1")
+    private int id;
+    @Value("default user")
+    private String name;
+    private float cost;
+    private boolean isValid;
+    private Date date;
+    private String detail;// test unicode
+    private String[] referral = {"Mark", "John", "Ken"};
+    private Appendix appendix = new Appendix();
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.beans;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+@Scope("prototype")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Message {
+    @Value("-1")
+    private int id;
+    @Value("default user")
+    private String name;
+    private float cost;
+    private boolean isValid;
+    private Date date;
+    private String detail;// test unicode
+    private String[] referral = {"Mark", "John", "Ken"};
+    private Appendix appendix = new Appendix();
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.beans;
+
+import lombok.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+@Component
+@Scope("prototype")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class Message {
+    @Value("-1")
+    private int id;
+    @Value("default user")
+    private String name;
+    private float cost;
+    private boolean isValid;
+    private Date date;
+    private String detail;// test unicode
+    private String[] referral = {"Mark", "John", "Ken"};
+    private Appendix appendix = new Appendix();
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@Slf4j
+public class HelloController {
+    @Autowired
+    private Message message;
+
+    @GetMapping("/hello")
+    ResponseEntity<?> home() {
+        log.info("message hash={}",message.hashCode());
+
+        message.setId(888);
+        message.setName("ucom");
+        return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.beans.Message;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
+
+@RestController
+@Slf4j
+public class WelcomeController {
+    @Autowired
+    private Message message;
+
+    @GetMapping("/welcome")
+    ResponseEntity<?> home() {
+        log.info("message hash={}", message.hashCode());
+        message.setCost(4.5f);
+        message.setValid(true);
+        message.setDate(new Date());
+        message.setDetail("試試萬國碼");
+        return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.counter;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Component
+@Scope("singleton")
+public class Counter1 {
+    private Integer value = 10;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.counter;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Component
+@Scope("prototype")
+public class Counter2 {
+    private Integer value = 20;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.counter;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.RequestScope;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Component
+@RequestScope
+public class Counter3 {
+    private Integer value=30;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.counter;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.annotation.SessionScope;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Component
+@SessionScope
+public class Counter4 {
+    private Integer value=40;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.counter;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.annotation.ApplicationScope;
+import org.springframework.web.context.annotation.SessionScope;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Component
+//@ApplicationScope
+@Scope(value = WebApplicationContext.SCOPE_APPLICATION,
+        proxyMode = ScopedProxyMode.TARGET_CLASS)
+public class Counter5 {
+    private Integer value = 50;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.counter.Counter1;
+import com.example.demo3.counter.Counter2;
+import com.example.demo3.counter.Counter3;
+import com.example.demo3.counter.Counter5;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+public class Rest1 {
+    @Autowired
+    private Counter1 counter1;
+    @Autowired
+    private Counter2 counter2;
+    @Autowired
+    private Counter3 counter3;
+    @Autowired
+    private Counter5 counter5;
+
+    @GetMapping("/rest1")
+    public ResponseEntity<?> doRest1() {
+        Map<String, Integer> result = new HashMap<>();
+        counter1.setValue(counter1.getValue() + 5);
+        counter2.setValue(counter2.getValue() + 5);
+        counter3.setValue(counter3.getValue() + 5);
+        counter5.setValue(counter5.getValue() + 5);
+        result.put("[singleton]counter1", counter1.getValue());
+        result.put("[prototype]counter1", counter2.getValue());
+        result.put("[request]counter1", counter3.getValue());
+        result.put("[application]counter1", counter5.getValue());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.counter.Counter1;
+import com.example.demo3.counter.Counter2;
+import com.example.demo3.counter.Counter3;
+import com.example.demo3.counter.Counter5;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+public class Rest2 {
+    @Autowired
+    private Counter1 counter1;
+    @Autowired
+    private Counter2 counter2;
+    @Autowired
+    private Counter3 counter3;
+    @Autowired
+    private Counter5 counter5;
+
+    @GetMapping("/rest2")
+    public ResponseEntity<?> doRest1() {
+        Map<String, Integer> result = new HashMap<>();
+        counter1.setValue(counter1.getValue() + 5);
+        counter2.setValue(counter2.getValue() + 5);
+        counter3.setValue(counter3.getValue() + 5);
+        counter5.setValue(counter5.getValue() + 5);
+        result.put("[singleton]counter1", counter1.getValue());
+        result.put("[prototype]counter1", counter2.getValue());
+        result.put("[request]counter1", counter3.getValue());
+        result.put("[application]counter1", counter5.getValue());
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+list.html
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>list variable</title>
+</head>
+<body>
+<h2>counter1=[[${c1}]]</h2>
+<h2>counter2=[[${c2}]]</h2>
+<h2>counter3=[[${c3}]]</h2>
+<h2>counter4=[[${c4}]]</h2>
+<h2>counter5=[[${c5}]]</h2>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.counter.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class Controller1 {
+    @Autowired
+    private Counter1 counter1;
+    @Autowired
+    private Counter2 counter2;
+    @Autowired
+    private Counter3 counter3;
+    @Autowired
+    private Counter4 counter4;
+    @Autowired
+    private Counter5 counter5;
+
+    @GetMapping("/list1")
+    public String list(Model model) {
+        counter1.setValue(counter1.getValue() + 1);
+        counter2.setValue(counter2.getValue() + 1);
+        counter3.setValue(counter3.getValue() + 1);
+        counter4.setValue(counter4.getValue() + 1);
+        counter5.setValue(counter5.getValue() + 1);
+        model.addAttribute("c1", counter1);
+        model.addAttribute("c2", counter2);
+        model.addAttribute("c3", counter3);
+        model.addAttribute("c4", counter4);
+        model.addAttribute("c5", counter5);
+
+        return "list";
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import com.example.demo3.counter.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class Controller2 {
+    @Autowired
+    private Counter1 counter1;
+    @Autowired
+    private Counter2 counter2;
+    @Autowired
+    private Counter3 counter3;
+    @Autowired
+    private Counter4 counter4;
+    @Autowired
+    private Counter5 counter5;
+
+    @GetMapping("/list2")
+    public String list(Model model) {
+        counter1.setValue(counter1.getValue() + 1);
+        counter2.setValue(counter2.getValue() + 1);
+        counter3.setValue(counter3.getValue() + 1);
+        counter4.setValue(counter4.getValue() + 1);
+        counter5.setValue(counter5.getValue() + 1);
+        model.addAttribute("c1", counter1);
+        model.addAttribute("c2", counter2);
+        model.addAttribute("c3", counter3);
+        model.addAttribute("c4", counter4);
+        model.addAttribute("c5", counter5);
+
+        return "list";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sesion_list.html
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a href="./session2">go to session2</a>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+session_result.html
+
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h2>key1=[[${key1}]]</h2>
+</body>
+</html>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class Controller3 {
+    @GetMapping("/session1")
+    public String session1(HttpSession session) {
+        session.setAttribute("key1", "abcde12345");
+        return "session_list";
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo3.controllers;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.SessionAttribute;
+
+@Controller
+public class Controller4 {
+    @GetMapping("/session2")
+    public String session2(Model model, @SessionAttribute("key1") String key1) {
+        model.addAttribute("key1", key1);
+        return "session_result";
+    }
+}
+
+
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.5&packaging=jar&jvmVersion=17&groupId=com.example&artifactId=demo4&name=demo4&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo4&dependencies=devtools,lombok,actuator,web,thymeleaf,h2,data-jdbc
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+http://localhost:8080/h2-console
+
+
+spring.application.name=demo4
+spring.datasource.url=jdbc:h2:mem:demo4
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=sa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Component;
+
+import java.sql.Connection;
+
+@Component
+@Slf4j
+@Order(1)
+public class Runner1 implements CommandLineRunner {
+    @Autowired
+    NamedParameterJdbcTemplate template;
+    private static final String SQL1 = "SELECT 1234+4321";
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("template={}", template);
+        log.info("template datasource={}", template.getJdbcTemplate().getDataSource());
+        Connection connection1 = template.getJdbcTemplate().getDataSource().getConnection();
+        log.info("datasource connection={}", connection1);
+        connection1.close();
+        SqlParameterSource source = new MapSqlParameterSource();
+        Integer intResult = template.queryForObject(SQL1, source, Integer.class);
+        log.info("execute {}, result={}", SQL1, intResult);
+    }
+}
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Component;
+
+import java.sql.Connection;
+
+@Component
+@Slf4j
+@Order(1)
+public class Runner1 implements CommandLineRunner {
+    @Autowired
+    NamedParameterJdbcTemplate template;
+    private static final String SQL1 = "SELECT 1234+4321";
+
+    @Override
+    public void run(String... args) throws Exception {
+//        log.info("template={}", template);
+//        log.info("template datasource={}", template.getJdbcTemplate().getDataSource());
+//        Connection connection1 = template.getJdbcTemplate().getDataSource().getConnection();
+//        log.info("datasource connection={}", connection1);
+//        connection1.close();
+        SqlParameterSource source = new MapSqlParameterSource();
+        Integer intResult = template.queryForObject(SQL1, source, Integer.class);
+        log.info("execute {}, result={}", SQL1, intResult);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo4
+spring.datasource.url=jdbc:h2:mem:demo4
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=sa
+#logging.level.root=debug
+logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(2)
+public class Runner2 implements CommandLineRunner {
+    @Autowired
+    NamedParameterJdbcTemplate template;
+    private static final String SQL1 = "SELECT :a + :b - :c * :d";
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("template={}", template);
+        SqlParameterSource source = new MapSqlParameterSource()
+                .addValue("a", 100)
+                .addValue("b", 200)
+                .addValue("c", 300)
+                .addValue("d", 400);
+        Integer result = template.queryForObject(SQL1, source, Integer.class);
+        log.info("calculate {} result={}", SQL1, result);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.bean;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+    private String username;
+    private String password;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Component
+@Slf4j
+@Order(3)
+public class Runner3 implements CommandLineRunner {
+    @Autowired
+    JdbcTemplate template;
+    private static final String USER1 = "Mark pwd1";
+    private static final String USER2 = "Tim pwd2";
+    private static final String USER3 = "Ken pwd3";
+    private static final String USER4 = "John pwd4";
+
+    @Override
+    public void run(String... args) throws Exception {
+        List<String[]> names = Arrays.asList(USER1,USER2,USER3,USER4)
+                .stream().map(new Function<String, String[]>() {
+                    @Override
+                    public String[] apply(String s) {
+                        return s.split(" ");
+                    }
+                }).collect(Collectors.toList());
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Component
+@Slf4j
+@Order(3)
+public class Runner3 implements CommandLineRunner {
+    @Autowired
+    JdbcTemplate template;
+    private static final String USER1 = "Mark pwd1";
+    private static final String USER2 = "Tim pwd2";
+    private static final String USER3 = "Ken pwd3";
+    private static final String USER4 = "John pwd4";
+
+    @Override
+    public void run(String... args) throws Exception {
+        List<String[]> names = Stream.of(USER1, USER2, USER3, USER4).map(new Function<String, String[]>() {
+            @Override
+            public String[] apply(String s) {
+                return s.split(" ");
+            }
+        }).toList();
+        names.forEach(n -> log.info("轉換回來的是:{}/{}", n[0], n[1]));
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(4)
+public class Runner4 implements CommandLineRunner {
+    @Autowired
+    private JdbcTemplate template;
+    private static final String CREATE_DDL = "CREATE TABLE users(id SERIAL, username VARCHAR(255), password VARCHAR(255))";
+    private static final String DROP_DDL = "DROP TABLE users IF EXISTS";
+
+    @Override
+    public void run(String... args) throws Exception {
+        template.execute(DROP_DDL);
+        template.execute(CREATE_DDL);
+        //template.execute(CREATE_DDL);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Component
+@Slf4j
+@Order(4)
+public class Runner4 implements CommandLineRunner {
+    @Autowired
+    private JdbcTemplate template;
+    private static final String CREATE_DDL = "CREATE TABLE users(id SERIAL, username VARCHAR(255), password VARCHAR(255))";
+    private static final String DROP_DDL = "DROP TABLE users IF EXISTS";
+    // sample data
+    private static final String USER1 = "Mark pwd1";
+    private static final String USER2 = "Tim pwd2";
+    private static final String USER3 = "Ken pwd3";
+    private static final String USER4 = "John pwd4";
+    // inser SQL
+    private static final String INSERT_DML = "INSERT INTO users( username, password ) VALUES (?,?)";
+
+    @Override
+    public void run(String... args) throws Exception {
+        template.execute(DROP_DDL);
+        template.execute(CREATE_DDL);
+        List<String> originalUsers = Arrays.asList(USER1, USER2, USER3, USER4);
+        List<Object[]> users = originalUsers.stream().map(s -> s.split(" ")).collect(Collectors.toList());
+        users.forEach(array -> log.info("will insert username:{}, password:{}", array[0], array[1]));
+        template.batchUpdate(INSERT_DML, users);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import com.example.demo4.bean.User;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Component
+@Slf4j
+@Order(4)
+public class Runner4 implements CommandLineRunner {
+    @Autowired
+    private JdbcTemplate template;
+    private static final String CREATE_DDL = "CREATE TABLE users(id SERIAL, username VARCHAR(255), password VARCHAR(255))";
+    private static final String DROP_DDL = "DROP TABLE users IF EXISTS";
+    // sample data
+    private static final String USER1 = "Mark pwd1";
+    private static final String USER2 = "Tim pwd2";
+    private static final String USER3 = "Ken pwd3";
+    private static final String USER4 = "John pwd4";
+    // inser SQL
+    private static final String INSERT_DML = "INSERT INTO users( username, password ) VALUES (?,?)";
+    // query DML
+    private static final String SELECT_DML = "SELECT * FROM users";
+
+    @Override
+    public void run(String... args) throws Exception {
+        template.execute(DROP_DDL);
+        template.execute(CREATE_DDL);
+        List<String> originalUsers = Arrays.asList(USER1, USER2, USER3, USER4);
+        List<Object[]> users = originalUsers.stream().map(s -> s.split(" ")).collect(Collectors.toList());
+        users.forEach(array -> log.info("will insert username:{}, password:{}", array[0], array[1]));
+        template.batchUpdate(INSERT_DML, users);
+//        List<User> totalUsers = template.query(SELECT_DML, (rs, rowNum) -> {
+//            log.info("rowNum={},rs={}", rowNum, rs);
+//            String username = rs.getString("username");
+//            String password = rs.getString("password");
+//            log.info("username={},password={}", username, password);
+//            return new User(username, password);
+//        });
+        List<User> totalUsers =template.query(SELECT_DML, (rs,rowNum)->new User(
+                rs.getString("username"),rs.getString("password")
+        ));
+        totalUsers.forEach(x -> log.info("total user, current user={}", x));
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import com.example.demo4.bean.User;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+@Component
+@Slf4j
+@Order(4)
+public class Runner4 implements CommandLineRunner {
+    @Autowired
+    private JdbcTemplate template;
+    private static final String CREATE_DDL = "CREATE TABLE users(id SERIAL, username VARCHAR(255), password VARCHAR(255))";
+    private static final String DROP_DDL = "DROP TABLE users IF EXISTS";
+    // sample data
+    private static final String USER1 = "Mark pwd1";
+    private static final String USER2 = "Tim pwd2";
+    private static final String USER3 = "Ken pwd3";
+    private static final String USER4 = "John pwd4";
+    // inser SQL
+    private static final String INSERT_DML = "INSERT INTO users( username, password ) VALUES (?,?)";
+    // query DML
+    private static final String SELECT_DML = "SELECT * FROM users";
+    private static final String SELECT_DML2 = "SELECT id, username, password FROM users WHERE username = ?";
+
+    @Override
+    public void run(String... args) throws Exception {
+        template.execute(DROP_DDL);
+        template.execute(CREATE_DDL);
+        List<String> originalUsers = Arrays.asList(USER1, USER2, USER3, USER4);
+        List<Object[]> users = originalUsers.stream().map(s -> s.split(" ")).collect(Collectors.toList());
+        users.forEach(array -> log.info("will insert username:{}, password:{}", array[0], array[1]));
+        template.batchUpdate(INSERT_DML, users);
+//        List<User> totalUsers = template.query(SELECT_DML, (rs, rowNum) -> {
+//            log.info("rowNum={},rs={}", rowNum, rs);
+//            String username = rs.getString("username");
+//            String password = rs.getString("password");
+//            log.info("username={},password={}", username, password);
+//            return new User(username, password);
+//        });
+        List<User> totalUsers = template.query(SELECT_DML, (rs, rowNum) -> new User(
+                rs.getString("username"), rs.getString("password")
+        ));
+        totalUsers.forEach(x -> log.info("total user, current user={}", x));
+        template.query(SELECT_DML, (rs, rowNum) -> new User(
+                rs.getString("username"), rs.getString("password")
+        )).forEach(user -> log.info("in stream current user={}", user));
+        User user = template.queryForObject(SELECT_DML2, (rs, rowNum) -> new User(
+                rs.getString("username"), rs.getString("password")
+        ), new Object[]{"Ken"});
+        log.info("query 'Ken', result={}", user);
+    }
+}
+
+src/main/resources/
+schema.sql
+
+
+CREATE TABLE users2(
+id INTEGER PRIMARY KEY AUTO_INCREMENT,
+username VARCHAR(255),
+password VARCHAR(255)
+);
