@@ -1,0 +1,1355 @@
+﻿src/main/resources/data.sql
+INSERT INTO users2 (username,password) VALUES ('Mark','PWD1');
+INSERT INTO users2 (username,password) VALUES ('Tim','PWD2');
+INSERT INTO users2 (username,password) VALUES ('Ken','PWD3');
+INSERT INTO users2 (username,password) VALUES ('John','PWD4');
+
+http://localhost:8080/
+
+
+https://survey.uuu.com.tw/
+
+22410043
+
+https://survey.uuu.com.tw/survey_keyin.aspx?class_id=22410043&course_id=%a5%f8%b7%7e%a5%5d%afZ
+
+
+------------------------------------
+spring.application.name=demo4
+#spring.datasource.url=jdbc:h2:mem:demo4
+spring.datasource.url=jdbc:h2:c:/Users/Admin/demo4
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=sa
+#logging.level.root=debug
+logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
+---------------------------------------
+dir c:\Users\Admin\demo4.*
+
+.\mvnw dependency:tree
+
+explorer ==> C:\Users\Admin\Downloads\h2-2024-08-11\h2\bin
+spring.sql.init.mode=always
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo4
+#spring.datasource.url=jdbc:h2:mem:demo4
+spring.datasource.url=jdbc:h2:c:/Users/Admin/demo4
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=sa
+#logging.level.root=debug
+logging.level.org.springframework.jdbc.core.JdbcTemplate=debug
+spring.sql.init.mode=always
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+http://localhost:8080/h2-console
+stop spring
+use h2 window ==> http://IP:8082
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+schema.sql
+
+DROP TABLE users2 IF EXISTS;
+
+CREATE TABLE users2(
+id INTEGER PRIMARY KEY AUTO_INCREMENT,
+username VARCHAR(255),
+password VARCHAR(255)
+);
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo4.runner;
+
+import com.example.demo4.bean.User;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(5)
+public class Runner5 implements CommandLineRunner {
+    @Autowired
+    private NamedParameterJdbcTemplate template;
+    private static final String SQL = "SELECT id, username, password FROM users2 WHERE id=:id";
+
+    @Override
+    public void run(String... args) throws Exception {
+        SqlParameterSource source = new MapSqlParameterSource()
+                .addValue("id", 2);
+        User user = template.queryForObject(SQL, source, (rs, rowNum) -> new User(
+                rs.getString("username"), rs.getString("password")
+        ));
+        log.info("get user with id 2 is -->{}", user);
+
+    }
+}
+
+
+open jconsole
+
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.6&packaging=jar&jvmVersion=17&groupId=com.example&artifactId=demo5&name=demo5&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo5&dependencies=devtools,lombok,web,actuator,h2,data-jpa
+
+
+.\mvnw dependency:tree
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo5
+spring.datasource.url=jdbc:h2:mem:demo5
+spring.datasource.username=sa
+spring.datasource.password=sa
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Customer {
+    @Id
+    @GeneratedValue
+    private Long id;
+    @Column(nullable = false)
+    private String firstName;
+    @Column(nullable = false)
+    private String lastName;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.repository;
+
+import com.example.demo5.entity.Customer;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CustomerRepository extends JpaRepository<Customer,Long> {
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.runner;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.repository.CustomerRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(1)
+public class CustomerRunner implements CommandLineRunner {
+    @Autowired
+    private CustomerRepository repository;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("repository={}", repository);
+        Customer c1 = new Customer();
+        c1.setFirstName("Mark");
+        c1.setLastName("Ho");
+        repository.save(c1);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo5
+spring.datasource.url=jdbc:h2:mem:demo5
+spring.datasource.username=sa
+spring.datasource.password=sa
+#
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+spring.application.name=demo5
+spring.datasource.url=jdbc:h2:mem:demo5
+spring.datasource.username=sa
+spring.datasource.password=sa
+#
+#spring.jpa.show-sql=true
+#spring.jpa.properties.hibernate.format_sql=true
+#
+logging.level.org.hibernate.type.EnumType=TRACE
+logging.level.org.hibernate.SQL=DEBUG
+logging.level.org.hibernate.orm.jdbc.bind=TRACE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.repository;
+
+import com.example.demo5.entity.Customer;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+
+public interface CustomerRepository extends JpaRepository<Customer, Long> {
+    @Query("SELECT x FROM Customer x ORDER BY x.lastName, x.firstName")
+    List<Customer> findAllOrderByName();
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Customer {
+    @Id
+    @GeneratedValue
+    private Long id;
+    @Column(nullable = false)
+    private String firstName;
+    @Column(nullable = false)
+    private String lastName;
+
+    public Customer(String lastName, String firstName) {
+        this.lastName = lastName;
+        this.firstName = firstName;
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.runner;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.repository.CustomerRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(1)
+public class CustomerRunner implements CommandLineRunner {
+    @Autowired
+    private CustomerRepository repository;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("repository={}", repository);
+        Customer c1 = new Customer();
+        c1.setFirstName("Mark");
+        c1.setLastName("Ho");
+        repository.save(c1);
+        addMoreCustomers();
+        callJpaQuery();
+    }
+
+    private void callJpaQuery() {
+        repository.findAllOrderByName().forEach(c -> log.info("query order by name:{}", c));
+    }
+
+    private void addMoreCustomers() {
+        repository.save(new Customer("Ho", "Peter"));
+        repository.save(new Customer("Chen", "Peter"));
+        repository.save(new Customer("Chen", "Mary"));
+        repository.save(new Customer("Lee", "Mary"));
+        repository.save(new Customer("Lee", "Ken"));
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.runner;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.repository.CustomerRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
+@Component
+@Slf4j
+@Order(1)
+public class CustomerRunner implements CommandLineRunner {
+    @Autowired
+    private CustomerRepository repository;
+
+    @Override
+    public void run(String... args) throws Exception {
+        log.info("repository={}", repository);
+        addMoreCustomers();
+        callJpaQuery();
+    }
+
+    private void callJpaQuery() {
+        repository.findAllOrderByName().forEach(c -> log.info("query order by name:{}", c));
+    }
+
+    private void addMoreCustomers() {
+        repository.save(new Customer("Ho", "Mark"));
+        repository.save(new Customer("Ho", "Peter"));
+        repository.save(new Customer("Chen", "Peter"));
+        repository.save(new Customer("Chen", "Mary"));
+        repository.save(new Customer("Lee", "Mary"));
+        repository.save(new Customer("Lee", "Ken"));
+    }
+}
+
+https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.service;
+
+import com.example.demo5.entity.Customer;
+
+import java.util.List;
+
+public interface CustomerService {
+    List<Customer> findAll();
+    Customer findOne(Long id);
+    Customer create(Customer customer);
+    Customer update(Customer customer);
+    void delete(Long id);
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.repository;
+
+import com.example.demo5.entity.Customer;
+import org.springframework.data.repository.CrudRepository;
+
+public interface CustomerSimpleRepository extends CrudRepository<Customer, Long> {
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Customer {
+    @Id
+    @GeneratedValue
+    private Long id;
+    @Column(nullable = false)
+    private String lastName;
+    @Column(nullable = false)
+    private String firstName;
+
+    public Customer(String lastName, String firstName) {
+        this.lastName = lastName;
+        this.firstName = firstName;
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.service;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.repository.CustomerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.Optional;
+
+public class CustomerJPAService implements CustomerService {
+    @Autowired
+    private CustomerRepository repository;
+
+    @Override
+    public List<Customer> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public Customer findOne(Long id) {
+        Optional<Customer> optionalCustomer = repository.findById(id);
+        if (optionalCustomer.isPresent()) {
+            return optionalCustomer.get();
+        }
+        return null;
+    }
+
+    @Override
+    public Customer create(Customer customer) {
+        return repository.save(customer);
+    }
+
+    @Override
+    public Customer update(Customer customer) {
+        return repository.save(customer);
+    }
+
+    @Override
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.service;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.repository.CustomerRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class CustomerJPAService implements CustomerService {
+    @Autowired
+    private CustomerRepository repository;
+
+    @Override
+    public List<Customer> findAll() {
+        return repository.findAll();
+    }
+
+    @Override
+    public Customer findOne(Long id) {
+        Optional<Customer> optionalCustomer = repository.findById(id);
+        if (optionalCustomer.isPresent()) {
+            return optionalCustomer.get();
+        }
+        return null;
+    }
+
+    @Override
+    public Customer create(Customer customer) {
+        return repository.save(customer);
+    }
+
+    @Override
+    public Customer update(Customer customer) {
+        return repository.save(customer);
+    }
+
+    @Override
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CustomerRestController
+
+package com.example.demo5.controller;
+
+import com.example.demo5.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("api/customers")
+@CrossOrigin
+public class CustomerRestController {
+    @Autowired
+    CustomerService service;
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/customers")
+@CrossOrigin
+public class CustomerRestController {
+    @Autowired
+    CustomerService service;
+
+    @GetMapping("/all")
+    List<Customer> getCustomer() {
+        return service.findAll();
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/customers")
+@CrossOrigin
+public class CustomerRestController {
+    @Autowired
+    CustomerService service;
+
+    @GetMapping("/all")
+    List<Customer> getCustomer() {
+        return service.findAll();
+    }
+
+    @RequestMapping(method = RequestMethod.POST)
+    Customer postCustomer(@RequestBody Customer c) {
+        return service.create(c);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/customers")
+@CrossOrigin
+public class CustomerRestController {
+    @Autowired
+    CustomerService service;
+
+    @GetMapping("/all")
+    List<Customer> getCustomer() {
+        return service.findAll();
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(method = RequestMethod.POST)
+    Customer postCustomer(@RequestBody Customer c) {
+        return service.create(c);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/customers")
+@CrossOrigin
+public class CustomerRestController {
+    @Autowired
+    CustomerService service;
+
+    @GetMapping("/all")
+    List<Customer> getCustomer() {
+        return service.findAll();
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(method = RequestMethod.POST)
+    Customer postCustomer(@RequestBody Customer c) {
+        return service.create(c);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    Customer getACustomer(@PathVariable Long id) {
+        return service.findOne(id);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/customers")
+@CrossOrigin
+public class CustomerRestController {
+    @Autowired
+    CustomerService service;
+
+    @GetMapping("/all")
+    List<Customer> getCustomer() {
+        return service.findAll();
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(method = RequestMethod.POST)
+    Customer postCustomer(@RequestBody Customer c) {
+        return service.create(c);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    Customer getACustomer(@PathVariable Long id) {
+        return service.findOne(id);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+    Customer putCustomer(@PathVariable Long id, @RequestBody Customer c) {
+        c.setId(id);
+        return service.update(c);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.entity.Customer;
+import com.example.demo5.service.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("api/customers")
+@CrossOrigin
+public class CustomerRestController {
+    @Autowired
+    CustomerService service;
+
+    @GetMapping("/all")
+    List<Customer> getCustomer() {
+        return service.findAll();
+    }
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(method = RequestMethod.POST)
+    Customer postCustomer(@RequestBody Customer c) {
+        return service.create(c);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    Customer getACustomer(@PathVariable Long id) {
+        return service.findOne(id);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.PUT)
+    Customer putCustomer(@PathVariable Long id, @RequestBody Customer c) {
+        c.setId(id);
+        return service.update(c);
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteCustomer(@PathVariable Long id) {
+        service.delete(id);
+    }
+}
+
+
+https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.6</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>demo5</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>demo5</name>
+	<description>Demo project for Spring Boot</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+        <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.13</version>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+http://localhost:8080/swagger-ui/index.html
+
+package com.example.demo5.controller;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("api/oops")
+@Slf4j
+public class OopsController {
+    @RequestMapping(method = RequestMethod.GET)
+    public String status() {
+        try {
+
+            int x = 5 / 0;
+        } catch (ArithmeticException ae) {
+            log.info("5/0 exception error as:{}", ae);
+            return "oops!";
+        }
+        return "status is good";
+    }
+    @GetMapping("/again")
+    public String status2() {
+        throw new RuntimeException("haha");
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class OopsException extends RuntimeException{
+    public OopsException(String message) {
+        super(message);
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OopsResponse {
+    private String oopsResponse;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.exception.OopsException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("api/oops")
+@Slf4j
+public class OopsController {
+    @RequestMapping(method = RequestMethod.GET)
+    public String status() {
+        try {
+
+            int x = 5 / 0;
+        } catch (ArithmeticException ae) {
+            log.info("5/0 exception error as:{}", ae);
+            return "oops!";
+        }
+        return "status is good";
+    }
+    @GetMapping("/again")
+    public String status2() {
+        throw new RuntimeException("haha");
+    }
+    @GetMapping("/explain")
+    public String status3() {
+        throw new OopsException("explain exception handling");
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+@ControllerAdvice
+public class GlobalResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleOopsException(OopsException e, WebRequest w) {
+        OopsResponse response = new OopsResponse(e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OopsResponse {
+    private String oopsReason;
+    private Integer level;
+    private String owner;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+@ControllerAdvice
+public class GlobalResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+    @ExceptionHandler
+    public final ResponseEntity<Object> handleOopsException(OopsException e, WebRequest w) {
+        OopsResponse response = new OopsResponse(e.getMessage(), 5, "Mark Ho");
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class NormalResult {
+    private Long id;
+    private String result;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class BadResult {
+    private Long id;
+    private String cause;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.exception.BadResult;
+import com.example.demo5.exception.NormalResult;
+import com.example.demo5.exception.OopsException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("api/oops")
+@Slf4j
+public class OopsController {
+    @RequestMapping(method = RequestMethod.GET)
+    public String status() {
+        try {
+
+            int x = 5 / 0;
+        } catch (ArithmeticException ae) {
+            log.info("5/0 exception error as:{}", ae);
+            return "oops!";
+        }
+        return "status is good";
+    }
+
+    @GetMapping("/again")
+    public String status2() {
+        throw new RuntimeException("haha");
+    }
+
+    @GetMapping("/explain")
+    public String status3() {
+        throw new OopsException("explain exception handling");
+    }
+
+    @RequestMapping(value = "{id}", method = RequestMethod.GET)
+    public ResponseEntity<?> status4(@PathVariable Long id) {
+        if (id <= -1) {
+            BadResult b1 = new BadResult(id, "id should larger than -1");
+            return new ResponseEntity<>(b1, HttpStatus.BAD_REQUEST);
+        } else {
+            NormalResult r1 = new NormalResult(id, "this is OK");
+            return new ResponseEntity<>(r1, HttpStatus.OK);
+        }
+
+    }
+}
+
+ .\mvnw dependency:tree
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.bean;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class HomeResponse {
+    private int id;
+    private String message;
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5.controller;
+
+import com.example.demo5.bean.HomeResponse;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class RootController {
+    @GetMapping("/")
+    public ResponseEntity<?> home() {
+        HomeResponse r1 = new HomeResponse(555,"OK");
+        return new ResponseEntity<>(r1, HttpStatus.OK);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class Rest1Test {
+    @Autowired
+    TestRestTemplate template;
+
+    @Test
+    public void checkTemplateIsValid() {
+        System.out.printf("template=%s\n", template);
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5;
+
+import com.example.demo5.bean.HomeResponse;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.ResponseEntity;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class Rest1Test {
+    @Autowired
+    TestRestTemplate template;
+
+    @Test
+    public void checkTemplateIsValid() {
+        System.out.printf("template=%s\n", template);
+    }
+
+    @Test
+    public void showRootIsOK() {
+        ResponseEntity<String> response = template.getForEntity("/", String.class);
+        System.out.printf("response status=[%s], body=%s\n", response.getStatusCode(), response.getBody());
+    }
+
+    @Test
+    public void showRootIsOKForHomeResponse() {
+        ResponseEntity<HomeResponse> response = template.getForEntity("/", HomeResponse.class);
+        HomeResponse testHomeResponse = response.getBody();
+        System.out.printf("response status=[%s], body=%s\n", response.getStatusCode(), testHomeResponse);
+        Assertions.assertEquals(555, testHomeResponse.getId());
+        Assertions.assertEquals("OK",testHomeResponse.getMessage());
+
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5;
+
+import com.example.demo5.bean.HomeResponse;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import io.swagger.v3.core.util.Json;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.ResponseEntity;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class Rest1Test {
+    @Autowired
+    TestRestTemplate template;
+
+    @Test
+    public void checkTemplateIsValid() {
+        System.out.printf("template=%s\n", template);
+    }
+
+    @Test
+    public void showRootIsOK() {
+        ResponseEntity<String> response = template.getForEntity("/", String.class);
+        System.out.printf("response status=[%s], body=%s\n", response.getStatusCode(), response.getBody());
+    }
+
+    @Test
+    public void parseRootResponse() {
+        ResponseEntity<String> response = template.getForEntity("/", String.class);
+        DocumentContext rootContext = JsonPath.parse(response.getBody());
+        Number id = rootContext.read("$.id");
+        Assertions.assertNotNull(id);
+        Assertions.assertEquals(555, id.intValue());
+        String message = rootContext.read("$.message");
+        Assertions.assertNotNull(message);
+        Assertions.assertEquals("OK", message);
+        //Object error = rootContext.read("$.error");
+        //Assertions.assertNull(error);
+    }
+
+    @Test
+    public void showRootIsOKForHomeResponse() {
+        ResponseEntity<HomeResponse> response = template.getForEntity("/", HomeResponse.class);
+        HomeResponse testHomeResponse = response.getBody();
+        System.out.printf("response status=[%s], body=%s\n", response.getStatusCode(), testHomeResponse);
+        Assertions.assertEquals(555, testHomeResponse.getId());
+        Assertions.assertEquals("OK", testHomeResponse.getMessage());
+
+    }
+}
+
+https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.6&packaging=jar&jvmVersion=17&groupId=com.example&artifactId=demo&name=demo&description=Demo%20project%20for%20Spring%20Boot&packageName=com.example.demo&dependencies=webflux
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.6</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+	<groupId>com.example</groupId>
+	<artifactId>demo5</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>demo5</name>
+	<description>Demo project for Spring Boot</description>
+	<url/>
+	<licenses>
+		<license/>
+	</licenses>
+	<developers>
+		<developer/>
+	</developers>
+	<scm>
+		<connection/>
+		<developerConnection/>
+		<tag/>
+		<url/>
+	</scm>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.13</version>
+        </dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class Ret2Test {
+    @LocalServerPort
+    int randomServerPort;
+    WebTestClient client;
+
+    @BeforeEach
+    public void prepare() {
+        client = WebTestClient.bindToServer()
+                .baseUrl("http://localhost:" + randomServerPort).build();
+        System.out.printf("base port=%d\n", randomServerPort);
+    }
+
+    @Test
+    public void clientIsValid() {
+        Assertions.assertNotNull(client);
+    }
+
+    @Test
+    public void checkRootIsOK() {
+        client.get().uri("/").exchange().expectStatus().isOk();
+    }
+
+    @Test
+    public void checkAuthIsNotOK() {
+        client.get().uri("/auth").exchange().expectStatus().isNotFound();
+    }
+}
+~~~~~~~~~~~~~~~~~~~~~~~~
+package com.example.demo5;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.web.reactive.server.WebTestClient;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class Ret2Test {
+    @LocalServerPort
+    int randomServerPort;
+    WebTestClient client;
+
+    @BeforeEach
+    public void prepare() {
+        client = WebTestClient.bindToServer()
+                .baseUrl("http://localhost:" + randomServerPort).build();
+        System.out.printf("base port=%d\n", randomServerPort);
+    }
+
+    @Test
+    public void clientIsValid() {
+        Assertions.assertNotNull(client);
+    }
+
+    @Test
+    public void checkRootIsOK() {
+        client.get().uri("/").exchange().expectStatus().isOk();
+    }
+    @Test
+    public void checkRootIdIsNotEmpty() {
+        client.get().uri("/").exchange().expectBody().jsonPath("$.id").isNotEmpty();
+    }
+    @Test
+    public void checkRootIdIs555() {
+        client.get().uri("/").exchange().expectBody().jsonPath("$.id").isEqualTo(555);
+    }
+    @Test
+    public void checkRootMessageIsOK() {
+        client.get().uri("/").exchange().expectBody().jsonPath("$.message").isEqualTo("OK");
+    }
+
+    @Test
+    public void checkAuthIsNotOK() {
+        client.get().uri("/auth").exchange().expectStatus().isNotFound();
+    }
+}
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
